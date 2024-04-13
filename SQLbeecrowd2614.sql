@@ -34,24 +34,34 @@ INSERT INTO rentals (rentals_date, id_customers) VALUES ('2016-04-04', 4);
 
 SELECT * FROM rentals;
 
--- Exemplo 1
+-- Exemplo 1 (não tão ideal)
 SELECT name, rentals_date
 FROM customers, rentals
 WHERE customers.id = id_customers
 AND rentals_date BETWEEN '2016-09-01' AND '2016-09-30';
 
--- Exemplo 2
-SELECT name
-FROM customers
-WHERE customers.id IN (
-	SELECT rentals_date
+/*-- Exemplo 2 (gambiarra -- beecrowd não aceita)
+SELECT name, rentals_date
+FROM customers, rentals
+WHERE customers.id IN ( -- posso usar = no lugar do IN
+	SELECT id_customers, rentals_date
     FROM rentals
     WHERE rentals_date BETWEEN '2016-09-01' AND '2016-09-30'
-);
+)
+LIMIT 1;*/
 
--- Exemplo 3
+-- Exemplo 3 (ideal, mais clara e simples)
 SELECT name, rentals_date
 FROM customers
-INNER JOIN rentals 
-ON customers.id = id_customers
+INNER JOIN rentals ON customers.id = id_customers
 WHERE rentals_date BETWEEN '2016-09-01' AND '2016-09-30';
+
+-- Exemplo 4 (pode ter um desempenho melhor, mas no beecrowd foi a que levou mais tempo -- em suma é subcolsulta aqui desnecessário sendo que where funcionou perfeitamente)
+SELECT name, rentals_date
+FROM customers
+INNER JOIN (
+	SELECT id_customers, rentals_date -- subconsulta
+    FROM rentals
+	WHERE rentals_date BETWEEN '2016-09-01' AND '2016-09-30'
+) rentals ON customers.id = id_customers;
+
