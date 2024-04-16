@@ -1,2 +1,2 @@
 # SQL-Beecrowd-Exercices
-Exercícios de SQL do Beecrowd (DDL + DML):
+Exercícios de SQL do Beecrowd (DDL + DML) para praticar:
