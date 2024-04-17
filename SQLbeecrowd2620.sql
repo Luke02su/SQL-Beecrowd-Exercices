@@ -36,7 +36,7 @@ INSERT INTO orders (orders_date, id_customers) VALUES ('2016-08-05', 3);
 
 SELECT * FROM orders;
 
--- Exemplo 1 (não ideal - junção explícita)
+-- Exemplo 1 (não ideal - junção explícita gera ambiguidade e pode não funcionar em ocasiões mais complexas)
 SELECT customers.name, orders.id
 FROM customers, orders
 WHERE customers.id = id_customers
