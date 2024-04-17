@@ -36,11 +36,31 @@ INSERT INTO orders (orders_date, id_customers) VALUES ('2016-08-05', 3);
 
 SELECT * FROM orders;
 
+-- Exemplo 1 (não ideal - junção explícita)
+SELECT customers.name, orders.id
+FROM customers, orders
+WHERE customers.id = id_customers
+AND orders_date <= '2016-06-30'; -- ou BETWEEN '2016-01-01' AND '2016-06-30'
 
+/*-- Exemplo 2 (a subconsulta aqui é inútil, desnecessário, a junção implícita já garante a relação gerada)
+SELECT customers.name, orders.id
+FROM customers, orders
+WHERE orders_date <= '2016-06-30' AND customers.id = id_customers AND customers.id IN (
+	SELECT id_customers
+    FROM orders 
+);*/
 
--- Exemplo 3
+-- Exemplo 3 (ideal -- quanto maior o número de dados a junção implícita se sobressai sobre a explícita e subconsultas desnecessárias)
 SELECT customers.name, orders.id
 FROM customers
 INNER JOIN orders ON customers.id = id_customers
-WHERE orders.orders_date <= '2016-06-30'; -- ou BETWEEN '2016-01-01' AND '2016-06-30';
+WHERE orders_date <= '2016-06-30'; -- ou BETWEEN '2016-01-01' AND '2016-06-30';
 
+/*-- Exemplo 4 (desnecesário subconsulta com INNER JOIN aqui, inútil sendo que o JOIN já garante a relação gerada)
+SELECT customers.name, orders.id
+FROM customers
+INNER JOIN orders ON customers.id = id_customers
+WHERE orders_date <= '2016-06-30' AND customers.id IN (
+	SELECT id_customers
+	FROM orders
+);*/
