@@ -62,7 +62,7 @@ SELECT CONCAT (
     SUBSTRING(cpf, 4, 3), '.',
     SUBSTRING(cpf, 7, 3), '-',
     SUBSTRING(cpf, 10, 2)
-) AS cpf
+) AS cpf-- necessário adicionar um nome para renomear o CONCAT
 FROM natural_person AS n
 LEFT JOIN customers AS c ON c.id = n.id_customers;
 
