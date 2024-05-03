@@ -68,7 +68,7 @@ WHERE c.population = (
     )
 );
 
--- Exemplo 2 (5s)
+-- Exemplo 2 (junção implícita -- teste, totalmente redundante e descenessário -- 5s)
 SELECT c.city_name, c.population
 FROM cities c, cities cc
 WHERE c.id = cc.id
@@ -93,26 +93,25 @@ AND cc.population = (
     )
 );
 
-
-
--- Exempo 3 (10s)
+-- Exempo 3 (junção implícita c/ subconsulta -- teste, totalmente redundante e descenessário -- de tão gambiarra, não está retornando o segundo maior)
+/*SELECT c.city_name, c.population
+FROM cities c
+INNER JOIN (
+	SELECT cc.id, MAX(cc.population) -- especificando também o id para funcionar
+    FROM cities cc
+    WHERE cc.population < (
+		SELECT MAX(cc.population)
+		FROM cities cc
+    )
+) cc ON c.id = cc.id
+UNION ALL
 SELECT c.city_name, c.population
 FROM cities c
 INNER JOIN (
-	SELECT MAX(c.population)
-    FROM cities c
-) cc ON c.id = cc.id;
-
-
-UNION ALL
-SELECT c.city_name, c.population
-FROM cities c, cities cc
-
-AND cc.population = (
-	SELECT MIN(c.population)
-    FROM cities c
-    WHERE c.population > (
-		SELECT MIN(c.population)
-		FROM cities c
+	SELECT cc.id, MIN(cc.population) -- especificando também o id para funcionar
+    FROM cities cc
+    WHERE cc.population > (
+		SELECT MIN(cc.population)
+		FROM cities cc
     )
-);
+) cc ON c.id = cc.id;/*
