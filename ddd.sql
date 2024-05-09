@@ -85,7 +85,6 @@ CREATE TABLE emp_venc (
     CONSTRAINT fk_matr2 FOREIGN KEY  emp_venc(matr) REFERENCES empregado(matr) -- não se pode ter CONSTRAINT (nomes de FOREIGN KEY) repetidas
 );
 
-
 drop database beecrowd2989;
 
 INSERT INTO departamento VALUES (1, 'Contabilidade', 'R. X'); -- poderia-se usar 'default' no lugar de 1, 2, 3, pois é auto_increment
@@ -131,6 +130,8 @@ INSERT INTO empregado VALUES (88, 'Yami', 'R. T', '2014-02-01T00:00:00Z', 2, nul
 INSERT INTO empregado VALUES (431, 'Joao da Silva', 'R. Y', '2011-07-03T00:00:00Z', 2, null, 21, null);
 INSERT INTO empregado VALUES (135, 'Ricardo Reis', 'R. 33', '2009-08-01T00:00:00Z', 2, null, 21, null);
 INSERT INTO empregado VALUES (254, 'Barbara', 'R. Z', '2008-01-03T00:00:00Z', 2, null, 22, 22);
+INSERT INTO empregado VALUES (371, 'Ines', 'R. Y', '2005-01-01T00:00:00Z', 2, null,	22, null);
+INSERT INTO empregado VALUES (476, 'Flor', 'R. Z', '2015-10-28T00:00:00Z', 2, null, 23, 23);
 INSERT INTO empregado VALUES (25, 'Lina', 'R. 67', '2014-09-01T00:00:00Z', 2, null, 23, null);
 INSERT INTO empregado VALUES (3, 'Jose da Silva', 'R. 8', '2011-01-02T00:00:00Z', 3, 3, 31, null);
 INSERT INTO empregado VALUES (71, 'Silverio dos Reis', 'R. C', '2009-01-05T00:00:00Z', 3, null, 31, 31);
@@ -140,3 +141,96 @@ INSERT INTO empregado VALUES (222, 'Marina', 'R. 31', '2015-01-07T00:00:00Z', 3,
 INSERT INTO empregado VALUES (725, 'Angelo', 'R. X', '2001-03-01T00:00:00Z', 2, null, 21, null);
 
 SELECT * FROM empregado;
+
+INSERT INTO dependente VALUES (9999, 'Francisco Jose', 'R. Z');
+INSERT INTO dependente VALUES (88, 'Maria da Silva', 'R. T');
+INSERT INTO dependente VALUES (55, 'Virgulino da Silva', 'R. 31');
+
+SELECT * FROM dependente;
+
+INSERT INTO vencimento VALUES (1, 'Salario base Analista de Sistemas', 'V', 5000);
+INSERT INTO vencimento VALUES (2, 'Salario base Contador', 'V', 3000);
+INSERT INTO vencimento VALUES (3,'Salario Base Engenheiro', 'V', 4500);
+INSERT INTO vencimento VALUES (4, 'Salario Base Projetista Software', 'V', 5000);
+INSERT INTO vencimento VALUES (5, 'Salario Base Programador de Sistemas', 'V', 3000);
+INSERT INTO vencimento VALUES (6, 'Gratificacao Chefia Departamento', 'V', 3750);
+INSERT INTO vencimento VALUES (7, 'Gratificacao Chefia Divisao', 'V', 2200);
+INSERT INTO vencimento VALUES (8, 'Salario Trabalhador Costrucao Civil', 'V', 800);
+INSERT INTO vencimento VALUES (9, 'Auxilio Salario Familia', 'V', 300);
+INSERT INTO vencimento VALUES (10, 'Gratificacao Tempo de servico', 'V', 350);
+INSERT INTO vencimento VALUES (11, 'Insalubridade', 'V', 800);
+INSERT INTO vencimento VALUES (12, 'Gratificacao por titulacao - Doutorado', 'V', 2000);
+INSERT INTO vencimento VALUES (13, 'Gratificacao por Titularidade - Mestrado', 'V', 800);
+
+SELECT * FROM vencimento;
+
+INSERT INTO emp_venc VALUES (1, 27);
+INSERT INTO emp_venc VALUES (1, 88);
+INSERT INTO emp_venc VALUES (1, 135);
+INSERT INTO emp_venc VALUES (1, 254);
+INSERT INTO emp_venc VALUES (1, 431);
+INSERT INTO emp_venc VALUES (2, 1);
+INSERT INTO emp_venc VALUES (2, 5);
+INSERT INTO emp_venc VALUES (2, 7);
+INSERT INTO emp_venc VALUES (2, 13);
+INSERT INTO emp_venc VALUES (2, 33);
+INSERT INTO emp_venc VALUES (2, 9999);
+INSERT INTO emp_venc VALUES (3, 3);
+INSERT INTO emp_venc VALUES (3, 55);
+INSERT INTO emp_venc VALUES (3, 71);
+INSERT INTO emp_venc VALUES (3, 222);
+INSERT INTO emp_venc VALUES (4, 25);
+INSERT INTO emp_venc VALUES (4, 476);
+INSERT INTO emp_venc VALUES (5, 371);
+INSERT INTO emp_venc VALUES (6, 3);
+INSERT INTO emp_venc VALUES (6, 27);
+INSERT INTO emp_venc VALUES (6, 9999);
+INSERT INTO emp_venc VALUES (7, 5);
+INSERT INTO emp_venc VALUES (7, 33);
+INSERT INTO emp_venc VALUES (7, 55);
+INSERT INTO emp_venc VALUES (7, 71);
+INSERT INTO emp_venc VALUES (7, 88);
+INSERT INTO emp_venc VALUES (7, 254);
+INSERT INTO emp_venc VALUES (7, 476);
+INSERT INTO emp_venc VALUES (8, 25);
+INSERT INTO emp_venc VALUES (8, 91);
+INSERT INTO emp_venc VALUES (9, 1);
+INSERT INTO emp_venc VALUES (9, 27);
+INSERT INTO emp_venc VALUES (9, 91);
+INSERT INTO emp_venc VALUES (9, 135);
+INSERT INTO emp_venc VALUES (9, 371);
+INSERT INTO emp_venc VALUES (9, 9999);
+INSERT INTO emp_venc VALUES (10, 371);
+INSERT INTO emp_venc VALUES (10, 9999);
+INSERT INTO emp_venc VALUES (11, 91);
+INSERT INTO emp_venc VALUES (12, 3);
+INSERT INTO emp_venc VALUES (12, 27);
+INSERT INTO emp_venc VALUES (12, 254);
+INSERT INTO emp_venc VALUES (12, 9999);
+INSERT INTO emp_venc VALUES (13, 3);
+INSERT INTO emp_venc VALUES (13, 5);
+INSERT INTO emp_venc VALUES (13, 7);
+INSERT INTO emp_venc VALUES (13, 25);
+INSERT INTO emp_venc VALUES (13, 33);
+INSERT INTO emp_venc VALUES (13, 88);
+INSERT INTO emp_venc VALUES (13, 135);
+
+SELECT * FROM emp_venc;
+
+-- Exemplo 1
+SELECT d.nome AS departamento, di.nome AS divisao,
+	(SELECT DISTINCT SUM(v.valor - )
+    FROM vencimento v, emp_venc ev, empregado e, desconto des, emp_desc ed
+    WHERE (v.cod_venc = ev.cod_venc and ev.matr = e.matr AND e.lotacao_div = 22 and e.matr = 27 AND )) AS maior
+FROM departamento d
+INNER JOIN divisao di ON d.cod_dep = di.cod_dep
+LEFT JOIN empregado e ON d.cod_dep = e.lotacao_div
+LEFT JOIN emp_venc ev ON e.matr = ev.matr
+RIGHT JOIN vencimento v ON ev.cod_venc = v.cod_venc
+GROUP BY d.nome;
+
+
+SELECT d.nome AS departamento, di.nome AS divisao, MAX(v.valor) AS maior
+FROM departamento d, divisao di, empregado e, emp_venc ev, vencimento v
+WHERE d.cod_dep = di.cod_dep AND d.cod_dep = e.lotacao_div AND e.matr = ev.matr AND ev.cod_venc = v.cod_venc
+GROUP BY d.nome;
