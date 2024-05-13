@@ -19,6 +19,7 @@ CREATE TABLE followers (
     CONSTRAINT following_user_id_fk FOREIGN KEY followers(following_user_id_fk) REFERENCES users(user_id) 
 );
 
+BEGIN;
 INSERT INTO users VALUES (default, 'Francisco', 23);
 INSERT INTO users VALUES (default, 'Brenda', 51);
 INSERT INTO users VALUES (default, 'Helena', 12);
@@ -26,8 +27,6 @@ INSERT INTO users VALUES (default, 'Miguel', 70);
 INSERT INTO users VALUES (default, 'Laura', 55);
 INSERT INTO users VALUES (default, 'Arthur', 2);
 INSERT INTO users VALUES (default, 'Alice', 3);
-
-SELECT * FROM users;
 
 INSERT INTO followers VALUES (default, 1, 5);
 INSERT INTO followers VALUES (default, 2, 4);
@@ -40,16 +39,31 @@ INSERT INTO followers VALUES (default, 5, 3);
 INSERT INTO followers VALUES (default, 5, 4);
 INSERT INTO followers VALUES (default, 5, 2);
 INSERT INTO followers VALUES (default, 7, 3);
+-- ROLLBACK;
+COMMIT;
 
-CREATE VIEW selectFollowers AS
+SELECT * FROM users;
 SELECT * FROM followers;
-SELECT * FROM selectFollowers;
+
+CREATE VIEW view_users AS SELECT * FROM users; -- view deve possuir um nome diferente da tabela a partir da qual ela é criada
+CREATE VIEW View_followers AS SELECT * FROM followers; -- view deve possuir um nome diferente da tabela a partir da qual ela é criada
+
+SELECT * FROM view_users;
+SELECT * FROM view_followers;
 
 -- Exemplo 1
-SELECT u.user_name AS u1_name, u.user_name AS u2_name
-FROM users u
-INNER JOIN followers f ON f.user_id_fk = u.user_id
-INNER JOIN followers ff ON u.user_id = ff.following_user_id_fk
-WHERE follower_id IN  (f.user_id_fk + ff.following_user_id_fk);
+SELECT u1.user_id, u2.user_id, f1.follower_id
+    CASE WHEN u1.posts < u2.posts THEN u1.user_name ELSE u2.user_name END AS u1_name,
+    CASE WHEN u1.posts > u2.posts THEN u1.user_name ELSE u2.user_name END AS u2_name
+FROM users u1
+INNER JOIN users u2 ON u1.user_id < u2.user_id -- duplicando tabela users
+INNER JOIN followers f1 ON u1.user_id = f1.user_id_fk AND u2.user_id = f1.following_user_id_fk -- seguindo oposto
+INNER JOIN followers f2 ON u2.user_id = f2.user_id_fk AND u1.user_id = f2.following_user_id_fk -- seguindo oposto
+ORDER BY u1.user_id;
 
-drop database beecrowd3482;
+-- Exemplo 1
+SELECT u1.user_id, u1.user_name
+FROM users u1
+ORDER BY u1.user_id;
+
+
