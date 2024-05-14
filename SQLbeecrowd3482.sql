@@ -51,19 +51,26 @@ CREATE VIEW View_followers AS SELECT * FROM followers; -- view deve possuir um n
 SELECT * FROM view_users;
 SELECT * FROM view_followers;
 
--- Exemplo 1
-SELECT u1.user_id, u2.user_id, f1.follower_id
-    CASE WHEN u1.posts < u2.posts THEN u1.user_name ELSE u2.user_name END AS u1_name,
-    CASE WHEN u1.posts > u2.posts THEN u1.user_name ELSE u2.user_name END AS u2_name
+-- Exemplo 1 (junção implícita -- não é o ideal por poder gerar ambiguidade -- 0,006s)
+SELECT
+	CASE WHEN u1.posts < u2.posts THEN u1.user_name ELSE u2.user_name END AS u1_name,
+    CASE WHEN u1.posts < u2.posts THEN u2.user_name ELSE u1.user_name END AS u2_name
+FROM users u1, users u2, followers f1, followers f2
+WHERE u1.user_id < u2.user_id
+AND u1.user_id = f1.user_id_fk AND u2.user_id = f1.following_user_id_fk
+AND u2.user_id = f2.user_id_fk AND u1.user_id = f2.following_user_id_fk
+ORDER BY 
+	CASE WHEN u1.posts < u2.posts THEN u1.user_id ELSE u2.user_id END;
+
+-- Exemplo 2 (junção explícita -- ideal -- 0.003s)
+SELECT 
+	CASE WHEN u1.posts < u2.posts THEN u1.user_name ELSE u2.user_name END AS u1_name, -- caso da primeira coluna com usuários c/ menos postagens
+    CASE WHEN u1.posts < u2.posts THEN u2.user_name ELSE u1.user_name END as u2_name -- caso da segunda coluna com usuários c/ mais postagen
 FROM users u1
-INNER JOIN users u2 ON u1.user_id < u2.user_id -- duplicando tabela users
-INNER JOIN followers f1 ON u1.user_id = f1.user_id_fk AND u2.user_id = f1.following_user_id_fk -- seguindo oposto
-INNER JOIN followers f2 ON u2.user_id = f2.user_id_fk AND u1.user_id = f2.following_user_id_fk -- seguindo oposto
-ORDER BY u1.user_id;
-
--- Exemplo 1
-SELECT u1.user_id, u1.user_name
-FROM users u1
-ORDER BY u1.user_id;
-
-
+INNER JOIN users u2 ON u1.user_id < u2.user_id -- duplicando tabela users e evitando duplicação de resultados (1,2 e 2,1)
+INNER JOIN followers f1 ON u1.user_id = f1.user_id_fk AND u2.user_id = f1.following_user_id_fk -- u1 segue u2
+INNER JOIN followers f2 ON u2.user_id = f2.user_id_fk AND u1.user_id = f2.following_user_id_fk -- u2 segue u1
+ORDER BY 
+	CASE WHEN u1.posts < u2.posts THEN u1.user_id ELSE u2.user_id END; -- ordenando id do usuário com menos postagens
+    
+-- Pode haver outras formas, inclusive com subconsultas, mas creio que são desnecessárias e muito confusas. Quanto mais complexo o código, melhor fazer de formas mais objetivas, claras e simplificadas, como no Exemplo 2.
