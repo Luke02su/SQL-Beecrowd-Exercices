@@ -64,6 +64,50 @@ SET @queue = 1; -- Treinando: atribuindo valor na variável por meio do @ (ideal
 SELECT * FROM chairs
 WHERE queue = @queue; -- comparando
 
+SET @chairs_count = ( -- Treinando (isso pode ser útil em uma store procedure pois pode ser reutilizado sem ter que fazer todo o bloco de código do select
+	SELECT COUNT(*) 
+    FROM chairs
+);
+
+SELECT @chairs_count;
+
+DELIMITER $$
+CREATE PROCEDURE chairs_count (count INT) -- não precisa ter o OUT necessariamente
+BEGIN
+SELECT @chairs_count INTO count; -- chamando variável que armazenu COUNT anteriormente
+END$$
+DELIMITER ;
+
+CALL chairs_count(@count); -- chamando a variável de saída
+SELECT @count; -- imprimindo-a
+
+DELIMITER $$
+CREATE PROCEDURE chairs_count2 (OUT count INT)
+BEGIN
+SELECT COUNT(*) INTO count -- COUNT diretamente neste select
+FROM chairs; 
+END$$
+DELIMITER ;
+
+CALL chairs_count2(@count2);
+SELECT @count2;
+
+DELIMITER $$
+CREATE PROCEDURE countChairsQueue (IN queueX SMALLINT, OUT countChairs SMALLINT) -- aqui também pode-se ocultar IN e OUT
+BEGIN
+SELECT COUNT(queue) INTO countChairs
+FROM chairs
+WHERE available = TRUE AND queueX = queue;
+END$$
+DELIMITER ;
+
+CALL countChairsQueue(2, @countChairs); -- entrada e saída respectivamente IN e OUT
+SELECT @countChairs;
+
+SET @queueX = 2; -- setando (SET) @queue como 2
+CALL countChairsQueue(@queueX, @countChairs); -- passando @queue como parâmetro 
+SELECT @countChairs;
+
 -- Exemplo 1 (junção implícita -- pode gerar ambiguidade -- 0.004s)
 SELECT c.queue, c.id AS "left", cc.id AS "right"
 FROM chairs c, chairs cc
