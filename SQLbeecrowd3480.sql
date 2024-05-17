@@ -60,6 +60,10 @@ DELIMITER ;
 
 CALL procedure_chairs(1);
 
+SET @queue = 1; -- Treinando: atribuindo valor na variável por meio do @ (ideal para usar quando não será reutilizado, como no caso do procedure)
+SELECT * FROM chairs
+WHERE queue = @queue; -- comparando
+
 -- Exemplo 1 (junção implícita -- pode gerar ambiguidade -- 0.004s)
 SELECT c.queue, c.id AS "left", cc.id AS "right"
 FROM chairs c, chairs cc
