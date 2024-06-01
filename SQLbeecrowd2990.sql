@@ -102,16 +102,6 @@ WHERE e.dnumero IN (
 )
 ORDER BY cpf;
 
-SELECT cpf, enome, dnome -- tive de usar uma subconsulta aqui pois a debaixo não trás o dnome
-FROM empregados e, departamentos d, trabalha t
-WHERE cpf IN (
-	SELECT cpf_emp
-    FROM trabalha 
-    WHERE cpf = cpf_emp
-    AND cpf_supervisor IS NULL
-)
-ORDER BY cpf;
-
 -- Exemplo 4 (junção explícita -- acessa indiretamente os que não trabalham em um projeto pelo cpf_supervisor is null-- 0.003s)
 SELECT cpf, enome, dnome
 FROM empregados e
@@ -139,3 +129,79 @@ WHERE NOT EXISTS ( -- onde nçao existir
 ORDER BY cpf;
 
 -- Testes.
+-- Treinando PROCEDURE, FUNCTION, VIEW, EVENT, TRIGGER:
+
+CREATE VIEW view_exemplo41 AS
+SELECT cpf, enome, dnome
+FROM empregados e
+INNER JOIN departamentos d ON e.dnumero = d.dnumero
+LEFT JOIN trabalha t ON cpf = cpf_emp
+WHERE cpf_emp IS NULL
+ORDER BY cpf;
+
+SELECT * FROM view_exemplo41;
+
+DELIMITER $$
+CREATE PROCEDURE procedure_exemplo41 ()
+BEGIN
+	SELECT cpf, enome, dnome
+	FROM empregados e
+	INNER JOIN departamentos d ON e.dnumero = d.dnumero
+	LEFT JOIN trabalha t ON cpf = cpf_emp
+	WHERE cpf_emp IS NULL
+ORDER BY cpf;
+END$$
+DELIMITER ;
+
+CALL procedure_exemplo41;
+
+CREATE TABLE log_delete_empregado (
+	cpf VARCHAR(15) NOT NULL PRIMARY KEY,
+    enome VARCHAR(60),
+    salario FLOAT NOT NULL,
+    cpf_supervisor VARCHAR(15),
+    dnumero INT NOT NULL,
+    usuario VARCHAR(25),
+    date TIMESTAMP
+);
+
+DELIMITER $$
+CREATE TRIGGER delete_empregado AFTER DELETE
+ON empregados
+FOR EACH ROW
+BEGIN
+	INSERT log_delete_empregado (
+		cpf,
+		enome,
+		salario,
+		cpf_supervisor,
+		dnumero,
+		usuario,
+		date
+    ) VALUES (
+		OLD.cpf,
+		OLD.enome,
+		OLD.salario,
+		OLD.cpf_supervisor,
+		OLD.dnumero,
+		USER(),
+		NOW()
+);
+END$$
+DELIMITER ; 
+
+DELIMITER $$
+CREATE EVENT delete_empregado
+ ON SCHEDULE
+ AT NOW() + INTERVAL 10 SECOND
+ DO 
+	BEGIN
+		DELETE FROM empregados WHERE cpf = 1733332162;
+    END$$
+DELIMITER ;
+
+SHOW EVENTS;
+SELECT * FROM empregados;
+SELECT * FROM log_delete_empregado;
+
+-- Falta FUNCTION 
