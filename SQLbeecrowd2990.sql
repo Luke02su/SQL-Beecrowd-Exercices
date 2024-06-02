@@ -109,7 +109,7 @@ INNER JOIN departamentos d ON e.dnumero = d.dnumero
 WHERE cpf_supervisor IS NULL
 ORDER BY cpf;
 
--- Exemplo 4.1 (junção explícita -- acessa diretamente os que não trabalham em um projeto trazendo os dados à esquerda (LEFT) da junção -- 0.004s)
+-- Exemplo 4.1 (junção explícita -- ideal, acessa diretamente os que não trabalham em um projeto trazendo os dados à esquerda (LEFT) da junção -- 0.004s)
 SELECT cpf, enome, dnome
 FROM empregados e
 INNER JOIN departamentos d ON e.dnumero = d.dnumero
@@ -117,7 +117,7 @@ LEFT JOIN trabalha t ON cpf = cpf_emp
 WHERE cpf_emp IS NULL
 ORDER BY cpf;
 
--- Exemplo 4 (junção explícita c/ subconsulta -- desnecessário -- 0.004s)
+-- Exemplo 5 (junção explícita c/ subconsulta -- desnecessário -- 0.004s)
 SELECT cpf, enome, dnome
 FROM empregados e
 INNER JOIN departamentos d ON e.dnumero = d.dnumero
@@ -142,7 +142,7 @@ ORDER BY cpf;
 SELECT * FROM view_exemplo41;
 
 DELIMITER $$
-CREATE PROCEDURE procedure_exemplo41 ()
+CREATE PROCEDURE procedure_exemplo41 ()  -- sem parâmetro de entrada, saída ou entrada-saída
 BEGIN
 	SELECT cpf, enome, dnome
 	FROM empregados e
@@ -204,4 +204,14 @@ SHOW EVENTS;
 SELECT * FROM empregados;
 SELECT * FROM log_delete_empregado;
 
--- Falta FUNCTION 
+DELIMITER $$
+CREATE FUNCTION cont_empregados () -- sem parâmetro de entrada
+RETURNS INT DETERMINISTIC
+	BEGIN
+		DECLARE cont_emp INT;
+        SELECT COUNT(cpf) INTO cont_emp FROM empregados;
+        RETURN cont_emp;
+    END$$
+DELIMITER ;
+
+SELECT cont_empregados(); 
