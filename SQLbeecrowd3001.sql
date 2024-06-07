@@ -130,7 +130,7 @@ DELIMITER ;
 
 SELECT func_count_typeA();
 
-CREATE TABLE log_update_products (
+CREATE TABLE log_old_update_products (
 	id SMALLINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(25) NOT NULL,
     type CHAR(1) NOT NULL,
@@ -140,40 +140,40 @@ CREATE TABLE log_update_products (
 );
 
 DELIMITER %%
-CREATE TRIGGER trg_update_products AFTER UPDATE
+CREATE TRIGGER trg_old_update_products AFTER UPDATE
 ON products
 FOR EACH ROW
 BEGIN
-	INSERT INTO log_update_products (
+	INSERT INTO log_old_update_products (
 		id, 
 		name,
 		type,
-		price
+		price,
+        user,
+        date
 	) VALUES (
-		NEW.id,
-        NEW.name,
-        NEW.type,
-        NEW.price,
+		OLD.id,
+        OLD.name,
+        OLD.type,
+        OLD.price,
         USER(),
         NOW()
 );
 END%%
 DELIMITER ;
 
+SET GLOBAL event_scheduler = ON;
+
 DELIMITER %%
-CREATE EVENT event_update_products
+CREATE EVENT event_old_update_products
 ON SCHEDULE
 AT NOW() + INTERVAL + 10 SECOND
 DO
 BEGIN
-	UPDATE products SET type = 'B' WHERE type = 'A';
+	UPDATE products SET type = 'B' WHERE type = 'A' AND id != 0; -- id != 0 ou desativar FK usando SET SQL_SAFE_UPDATES = 0;
 END%%
 DELIMITER ;
 
-SET GLOBAL event_scheduler = ON;
-
-drop event event_update_products;
-
 SHOW EVENTS;
 SELECT * FROM products;
-SELECT * FROM log_update_products;
+SELECT * FROM log_old_update_products;
