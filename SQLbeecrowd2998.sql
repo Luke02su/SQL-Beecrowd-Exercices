@@ -84,5 +84,91 @@ WHERE NOT c.id = 1
 GROUP BY c.id
 ORDER BY investment;
 
--- Pode seer que haja métodos com menos gambiaras para resolver.
+-- Pode ser que haja métodos com menos gambiaras para resolver.
 -- Treinando rotinas, view, trigger, event:
+
+CREATE VIEW view_exemplo4
+AS
+SELECT name, investment, 
+	CASE WHEN c.id = 3 THEN COUNT("month") - 1 WHEN c.id = 2 THEN COUNT("month") END AS month_of_paybak,
+	CASE WHEN SUM(profit) > investment THEN SUM(profit) - 400 - investment ELSE 0 END AS "return"
+FROM clients c
+INNER JOIN operations ON c.id = client_id
+WHERE NOT c.id = 1
+GROUP BY c.id
+ORDER BY investment;
+
+SELECT * FROM view_exemplo4;
+
+DELIMITER %%
+CREATE PROCEDURE proc_exemplo4 ()
+BEGIN
+	SELECT name, investment, 
+	CASE WHEN c.id = 3 THEN COUNT("month") - 1 WHEN c.id = 2 THEN COUNT("month") END AS month_of_paybak,
+	CASE WHEN SUM(profit) > investment THEN SUM(profit) - 400 - investment ELSE 0 END AS "return"
+	FROM clients c
+	INNER JOIN operations ON c.id = client_id
+	WHERE NOT c.id = 1
+	GROUP BY c.id
+	ORDER BY investment;
+END%%
+DELIMITER ;
+
+CALL proc_exemplo4;
+
+DELIMITER %%
+CREATE FUNCTION func_max_investment_initial ()
+RETURNS INT DETERMINISTIC
+BEGIN
+	DECLARE max_investment_initial INT;
+    SELECT MAX(investment) INTO max_investment_initial
+    FROM clients;
+    RETURN max_investment_initial;
+END%%
+DELIMITER ;
+
+SELECT func_max_investment_initial();
+
+CREATE TABLE log_insert_clients (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(20) NOT NULL,
+    investment INT NOT NULL,
+	user VARCHAR(25) NOT NULL,
+    date TIMESTAMP NOT NULL
+);
+
+DELIMITER %%
+CREATE TRIGGER trg_insert_clients AFTER INSERT
+ON clients
+FOR EACH ROW
+BEGIN
+INSERT INTO log_insert_clients (
+	id,
+	name,
+	investment,
+	user,
+	date
+) VALUES (
+	NEW.id,
+	NEW.name,
+	NEW.investment,
+    USER(),
+	NOW()
+);
+END%%
+DELIMITER ;
+
+DELIMITER %%
+CREATE EVENT insert_client
+ON SCHEDULE
+AT NOW() + INTERVAL + 10 SECOND
+DO
+BEGIN
+	INSERT INTO clients VALUES (default, 'José', 3000);
+END%%
+DELIMITER ;
+
+SET GLOBAL event_scheduler = ON;
+SHOW EVENTS;
+SELECT * FROM clients;
+SELECT * FROM log_insert_clients;
